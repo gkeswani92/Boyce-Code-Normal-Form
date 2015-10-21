@@ -38,7 +38,15 @@ public class AttributeSet {
 			return false;
 		}
 		//TODO: you should probably implement this
-		return this == other;
+		if(this.size() == ((AttributeSet)other).size()){
+			Iterator<Attribute> iter = iterator();
+			while(iter.hasNext()){
+				Attribute attr =  iter.next();
+				if(!((AttributeSet)other).contains(attr))
+					return false;
+			}
+		}
+		return true;
 	}
 
 	public Iterator<Attribute> iterator() {
@@ -52,5 +60,43 @@ public class AttributeSet {
 			out += iter.next() + "\t";
 
 		return out;
+	}
+	
+	/**
+	 * Gets the attribute set as an arraylist of attributes
+	 */
+	public ArrayList<Attribute> getAttributeList(){
+		
+		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+		Iterator<Attribute> iter = iterator();
+		
+		while(iter.hasNext())
+			attributes.add(iter.next());
+		
+		return attributes;
+	}
+	
+	/**
+	 * Util method that is used while calculating the combinations of the various
+	 * attributes
+	 */
+	public void removeLastAttribute(){
+		Iterator<Attribute> iter = iterator();
+		while(iter.hasNext()){
+			iter.next();
+			if(iter.hasNext() == false)
+				iter.remove();
+		}
+	}
+	
+	/**
+	 * Append attributes to the current attribute set
+	 * @param other
+	 */
+	public void appendAttributeSet(AttributeSet other){
+		Iterator<Attribute> iter = other.iterator();
+		while(iter.hasNext()){
+			this.addAttribute(iter.next());
+		}
 	}
 }

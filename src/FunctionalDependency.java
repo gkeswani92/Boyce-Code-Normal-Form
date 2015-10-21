@@ -9,6 +9,8 @@ public class FunctionalDependency {
 	private final AttributeSet _independentAttributeSet;
 	private final AttributeSet _dependentAttributeSet;
 	//this FD represents independentSet -> dependentSet
+	
+	
 
 	public FunctionalDependency(AttributeSet ind, AttributeSet dep) {
 		_independentAttributeSet = new AttributeSet(ind);
