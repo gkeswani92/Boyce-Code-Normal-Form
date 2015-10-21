@@ -45,8 +45,9 @@ public class AttributeSet {
 				if(!((AttributeSet)other).contains(attr))
 					return false;
 			}
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	public Iterator<Attribute> iterator() {
@@ -98,5 +99,18 @@ public class AttributeSet {
 		while(iter.hasNext()){
 			this.addAttribute(iter.next());
 		}
+	}
+	
+	/**
+	 * Checking if current attribute set is a subset of another attribute set
+	 * @param other
+	 */
+	public boolean isSupersetOf(AttributeSet other){
+		Iterator<Attribute> iter = other.iterator();
+		while(iter.hasNext()){
+			if(!this.contains(iter.next()))
+				return false;
+		}
+		return true;
 	}
 }
