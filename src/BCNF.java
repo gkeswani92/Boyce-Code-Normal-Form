@@ -21,6 +21,52 @@ public class BCNF {
 		return Collections.emptySet();
 	}
 
+	
+	/**
+	 * Method to determine all the possible combinations of attributes
+	 * @param attributes
+	 * @param startIndex
+	 * @param attributeCombination
+	 * @param combinationGenerator
+	 * @return
+	 */
+	public static ArrayList<AttributeSet> getAttributeCombinations(ArrayList<Attribute> attributes, int startIndex,
+					ArrayList<AttributeSet> attributeCombination, AttributeSet combinationGenerator) {
+		
+		for (int i = startIndex; i < attributes.size(); i++) {
+			combinationGenerator.addAttribute(attributes.get(i));
+			attributeCombination.add(new AttributeSet(combinationGenerator));
+			attributeCombination = getAttributeCombinations(attributes, i+1, attributeCombination, combinationGenerator);
+			combinationGenerator.removeLastAttribute();
+		}
+		return attributeCombination;
+	}
+	
+	/**
+	 * Finds all the keys for the relation given the functional dependencies
+	 * @param attributeSetRelation
+	 * @param functionalDependencies
+	 * @param attributeCombination
+	 * @return
+	 */
+	public static ArrayList<AttributeSet> getAllKeys(AttributeSet attributeSetRelation,
+			Set<FunctionalDependency> functionalDependencies, ArrayList<AttributeSet> attributeCombination){
+		
+		ArrayList<AttributeSet> keys = new ArrayList<AttributeSet>();
+		
+		for(AttributeSet as: attributeCombination){
+			AttributeSet closureOfCurrentAttributeSet = closure(as, functionalDependencies);
+			if(closureOfCurrentAttributeSet.size() == attributeSetRelation.size()){
+				keys.add(as);
+			}
+		}
+		return keys;
+	}
+	
+	public static ArrayList<AttributeSet> getCandidateKeys(ArrayList<AttributeSet> keys){
+		
+		return null;
+	}
 
 	/**
 	 * Recommended helper method 
