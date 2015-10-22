@@ -156,135 +156,7 @@ public class BCNFTest {
 		}
 	}
 
-	@Test
-	public void difficultTextBookExample() {
-		// construct table
-		AttributeSet attrs = new AttributeSet();
-		attrs.addAttribute(new Attribute("c"));
-		attrs.addAttribute(new Attribute("s"));
-		attrs.addAttribute(new Attribute("j"));
-		attrs.addAttribute(new Attribute("d"));
-		attrs.addAttribute(new Attribute("p"));
-		attrs.addAttribute(new Attribute("q"));
-		attrs.addAttribute(new Attribute("v"));
-
-		// create functional dependencies ***KEY*** Set<FunctionalDependency>
-		Set<FunctionalDependency> fds = new HashSet<FunctionalDependency>();
-		AttributeSet ind = new AttributeSet();
-		AttributeSet dep = new AttributeSet();
-		
-		//c -> sjdpqv
-		ind.addAttribute(new Attribute("c"));
-		dep.addAttribute(new Attribute("s"));
-		dep.addAttribute(new Attribute("j"));
-		dep.addAttribute(new Attribute("d"));
-		dep.addAttribute(new Attribute("p"));
-		dep.addAttribute(new Attribute("q"));
-		dep.addAttribute(new Attribute("v"));
-		FunctionalDependency fd = new FunctionalDependency(ind, dep);
-		fds.add(fd);
-
-		// create functional dependencies jp->c
-		AttributeSet ind1 = new AttributeSet();
-		AttributeSet dep1 = new AttributeSet();
-		ind1.addAttribute(new Attribute("j"));
-		ind1.addAttribute(new Attribute("p"));
-		dep1.addAttribute(new Attribute("c"));
-		FunctionalDependency fd1 = new FunctionalDependency(ind1, dep1);
-		fds.add(fd1);
-
-		// create functional dependencies SD->P
-		AttributeSet ind2 = new AttributeSet();
-		AttributeSet dep2 = new AttributeSet();
-		ind2.addAttribute(new Attribute("s"));
-		ind2.addAttribute(new Attribute("d"));
-		dep2.addAttribute(new Attribute("p"));
-		FunctionalDependency fd2 = new FunctionalDependency(ind2, dep2);
-		fds.add(fd2);
-
-		// create functional dependencies J->S
-		AttributeSet ind3 = new AttributeSet();
-		AttributeSet dep3 = new AttributeSet();
-		ind3.addAttribute(new Attribute("j"));
-		dep3.addAttribute(new Attribute("s"));
-		FunctionalDependency fd3 = new FunctionalDependency(ind3, dep3);
-		fds.add(fd3);
-
-		// run client code
-		Set<AttributeSet> bcnf = BCNF.decompose(attrs, fds);
-
-		// verify output
-		assertEquals("Incorrect number of tables", 3, bcnf.size());
-
-		for (AttributeSet as : bcnf) {
-
-			if (as.contains(new Attribute("p"))) {
-				assertEquals("Incorrect number of attributes", 3, as.size());
-				assertTrue("Incorrect table", as.contains(new Attribute("s")));
-			} else if (as.contains(new Attribute("c"))) {
-				assertEquals("Incorrect number of attributes", 5, as.size());
-				assertTrue("Incorrect table", as.contains(new Attribute("v")));
-			} else {
-				assertEquals("Incorrect number of attributes", 2, as.size());
-				assertTrue("Incorrect table", as.contains(new Attribute("s")));
-			}
-		}
-	}
-
-	/**
-	 * Performs a basic test on a simple table. gives input attributes
-	 * (a,b,c,d,e,f) and functional dependency d->bc, af->e, b->ac and expects
-	 * output (a,c) since no decomposition is needed
-	 **/
-	// @Test
-	public void testMediumBCNF() {
-		// construct table
-		AttributeSet attrs = new AttributeSet();
-		attrs.addAttribute(new Attribute("a"));
-		attrs.addAttribute(new Attribute("b"));
-		attrs.addAttribute(new Attribute("c"));
-		attrs.addAttribute(new Attribute("d"));
-		attrs.addAttribute(new Attribute("e"));
-		attrs.addAttribute(new Attribute("f"));
-
-		// create functional dependencies
-		Set<FunctionalDependency> fds = new HashSet<FunctionalDependency>();
-		AttributeSet ind = new AttributeSet();
-		AttributeSet dep = new AttributeSet();
-
-		// Adding dependency d -> bc
-		ind.addAttribute(new Attribute("d"));
-		dep.addAttribute(new Attribute("b"));
-		dep.addAttribute(new Attribute("c"));
-		FunctionalDependency fd = new FunctionalDependency(ind, dep);
-		fds.add(fd);
-
-		// Adding dependency af -> e
-		ind.addAttribute(new Attribute("a"));
-		ind.addAttribute(new Attribute("f"));
-		dep.addAttribute(new Attribute("e"));
-		fd = new FunctionalDependency(ind, dep);
-		fds.add(fd);
-
-		// Adding dependency c > ac
-		ind.addAttribute(new Attribute("b"));
-		dep.addAttribute(new Attribute("a"));
-		dep.addAttribute(new Attribute("c"));
-		fd = new FunctionalDependency(ind, dep);
-		fds.add(fd);
-
-		// run client code
-		Set<AttributeSet> bcnf = BCNF.decompose(attrs, fds);
-
-		// verify output
-		assertEquals("Incorrect number of tables", 3, bcnf.size());
-
-		for (AttributeSet as : bcnf) {
-			assertEquals("Incorrect number of attributes", 2, as.size());
-			assertTrue("Incorrect table", as.contains(new Attribute("a")));
-		}
-	}
-
+	
 	/**
 	 * 
 	 * Expected - bac, afe, dfg, db
@@ -293,7 +165,6 @@ public class BCNFTest {
 	 */
 
 	@Test
-
 	public void testBCNFQuestion3() {
 
 		// construct table
@@ -337,15 +208,27 @@ public class BCNFTest {
 
 		// run client code
 		Set<AttributeSet> bcnf = BCNF.decompose(attrs, fds);
-
-		System.out.println(bcnf);
+		
 		// verify output
-		assertEquals("Incorrect number of tables", 4, bcnf.size());
+		assertEquals("Incorrect number of tables", 3, bcnf.size());
 
-		// for(AttributeSet as : bcnf) {
-		// assertEquals("Incorrect number of attributes", 3, as.size());
-		// assertTrue("Incorrect table", as.contains(new Attribute("a")));
-		// }
+		for(AttributeSet as : bcnf) {
+			if (as.contains(new Attribute("c"))) {
+				assertEquals("Incorrect number of attributes", 3, as.size());
+				assertTrue("Incorrect table", as.contains(new Attribute("d")));
+				assertTrue("Incorrect table", as.contains(new Attribute("b")));
+			} else if (as.contains(new Attribute("e"))) {
+				assertEquals("Incorrect number of attributes", 3, as.size());
+				assertTrue("Incorrect table", as.contains(new Attribute("a")));
+				assertTrue("Incorrect table", as.contains(new Attribute("f")));
+			} else {
+				assertEquals("Incorrect number of attributes", 4, as.size());
+				assertTrue("Incorrect table", as.contains(new Attribute("a")));
+				assertTrue("Incorrect table", as.contains(new Attribute("d")));
+				assertTrue("Incorrect table", as.contains(new Attribute("f")));
+				assertTrue("Incorrect table", as.contains(new Attribute("g")));
+			}
+		}
 	}
 
 	/**
@@ -355,7 +238,6 @@ public class BCNFTest {
 	 */
 
 	@Test
-
 	public void testBCNFQuestion19_5_1() {
 
 		// construct table
@@ -436,6 +318,158 @@ public class BCNFTest {
 			assertEquals("Incorrect number of attributes", 2, as.size());
 			assertTrue("Incorrect table", as.contains(new Attribute("b")));
 
+		}
+	}
+	
+	@Test
+	public void difficultTextBookExample() {
+		// construct table
+		AttributeSet attrs = new AttributeSet();
+		attrs.addAttribute(new Attribute("c"));
+		attrs.addAttribute(new Attribute("s"));
+		attrs.addAttribute(new Attribute("j"));
+		attrs.addAttribute(new Attribute("d"));
+		attrs.addAttribute(new Attribute("p"));
+		attrs.addAttribute(new Attribute("q"));
+		attrs.addAttribute(new Attribute("v"));
+
+		// create functional dependencies ***KEY*** Set<FunctionalDependency>
+		Set<FunctionalDependency> fds = new HashSet<FunctionalDependency>();
+		AttributeSet ind = new AttributeSet();
+		AttributeSet dep = new AttributeSet();
+		
+		//c -> sjdpqv
+		ind.addAttribute(new Attribute("c"));
+		dep.addAttribute(new Attribute("s"));
+		dep.addAttribute(new Attribute("j"));
+		dep.addAttribute(new Attribute("d"));
+		dep.addAttribute(new Attribute("p"));
+		dep.addAttribute(new Attribute("q"));
+		dep.addAttribute(new Attribute("v"));
+		FunctionalDependency fd = new FunctionalDependency(ind, dep);
+		fds.add(fd);
+
+		// create functional dependencies jp->c
+		AttributeSet ind1 = new AttributeSet();
+		AttributeSet dep1 = new AttributeSet();
+		ind1.addAttribute(new Attribute("j"));
+		ind1.addAttribute(new Attribute("p"));
+		dep1.addAttribute(new Attribute("c"));
+		FunctionalDependency fd1 = new FunctionalDependency(ind1, dep1);
+		fds.add(fd1);
+
+		// create functional dependencies SD->P
+		AttributeSet ind2 = new AttributeSet();
+		AttributeSet dep2 = new AttributeSet();
+		ind2.addAttribute(new Attribute("s"));
+		ind2.addAttribute(new Attribute("d"));
+		dep2.addAttribute(new Attribute("p"));
+		FunctionalDependency fd2 = new FunctionalDependency(ind2, dep2);
+		fds.add(fd2);
+
+		// create functional dependencies J->S
+		AttributeSet ind3 = new AttributeSet();
+		AttributeSet dep3 = new AttributeSet();
+		ind3.addAttribute(new Attribute("j"));
+		dep3.addAttribute(new Attribute("s"));
+		FunctionalDependency fd3 = new FunctionalDependency(ind3, dep3);
+		fds.add(fd3);
+
+		// run client code
+		Set<AttributeSet> bcnf = BCNF.decompose(attrs, fds);
+
+		// verify output
+		assertEquals("Incorrect number of tables", 3, bcnf.size());
+
+		for (AttributeSet as : bcnf) {
+			if (as.contains(new Attribute("p"))) {
+				assertEquals("Incorrect number of attributes", 3, as.size());
+				assertTrue("Incorrect table", as.contains(new Attribute("s")));
+				assertTrue("Incorrect table", as.contains(new Attribute("d")));
+			} else if (as.contains(new Attribute("v"))) {
+				assertEquals("Incorrect number of attributes", 5, as.size());
+				assertTrue("Incorrect table", as.contains(new Attribute("c")));
+				assertTrue("Incorrect table", as.contains(new Attribute("j")));
+				assertTrue("Incorrect table", as.contains(new Attribute("q")));
+				assertTrue("Incorrect table", as.contains(new Attribute("d")));
+			} else {
+				assertEquals("Incorrect number of attributes", 2, as.size());
+				assertTrue("Incorrect table", as.contains(new Attribute("j")));
+				assertTrue("Incorrect table", as.contains(new Attribute("s")));
+			}
+		}
+	}
+
+	/**
+	 * Performs a basic test on a simple table. gives input attributes
+	 * (a,b,c,d,e,f) and functional dependency d->bc, af->e, b->ac and expects
+	 * output (a,c) since no decomposition is needed
+	 * 
+	 * Expected output is dbc, afe, daf
+	 **/
+	@Test
+	public void testMediumBCNF() {
+		// construct table
+		AttributeSet attrs = new AttributeSet();
+		attrs.addAttribute(new Attribute("a"));
+		attrs.addAttribute(new Attribute("b"));
+		attrs.addAttribute(new Attribute("c"));
+		attrs.addAttribute(new Attribute("d"));
+		attrs.addAttribute(new Attribute("e"));
+		attrs.addAttribute(new Attribute("f"));
+
+		// create functional dependencies
+		Set<FunctionalDependency> fds = new HashSet<FunctionalDependency>();
+		AttributeSet ind = new AttributeSet();
+		AttributeSet dep = new AttributeSet();
+
+		// Adding dependency d -> bc
+		ind.addAttribute(new Attribute("d"));
+		dep.addAttribute(new Attribute("b"));
+		dep.addAttribute(new Attribute("c"));
+		FunctionalDependency fd = new FunctionalDependency(ind, dep);
+		fds.add(fd);
+
+		// Adding dependency af -> e
+		AttributeSet ind2 = new AttributeSet();
+		AttributeSet dep2 = new AttributeSet();
+		ind2.addAttribute(new Attribute("a"));
+		ind2.addAttribute(new Attribute("f"));
+		dep2.addAttribute(new Attribute("e"));
+		fd = new FunctionalDependency(ind2, dep2);
+		fds.add(fd);
+
+		// Adding dependency b > ac
+		AttributeSet ind3 = new AttributeSet();
+		AttributeSet dep3 = new AttributeSet();
+		ind3.addAttribute(new Attribute("b"));
+		dep3.addAttribute(new Attribute("a"));
+		dep3.addAttribute(new Attribute("c"));
+		fd = new FunctionalDependency(ind3, dep3);
+		fds.add(fd);
+
+		// run client code
+		Set<AttributeSet> bcnf = BCNF.decompose(attrs, fds);
+
+		// verify output
+		assertEquals("Incorrect number of tables", 3, bcnf.size());
+
+		//dbc, afe, bac
+		for (AttributeSet as : bcnf) {
+			if (as.contains(new Attribute("c"))) {
+				assertEquals("Incorrect number of attributes", 3, as.size());
+				assertTrue("Incorrect table", as.contains(new Attribute("b")));
+				assertTrue("Incorrect table", as.contains(new Attribute("d")));
+			} else if (as.contains(new Attribute("e"))) {
+				assertEquals("Incorrect number of attributes", 3, as.size());
+				assertTrue("Incorrect table", as.contains(new Attribute("a")));
+				assertTrue("Incorrect table", as.contains(new Attribute("f")));
+			} else {
+				assertEquals("Incorrect number of attributes", 3, as.size());
+				assertTrue("Incorrect table", as.contains(new Attribute("d")));
+				assertTrue("Incorrect table", as.contains(new Attribute("a")));
+				assertTrue("Incorrect table", as.contains(new Attribute("f")));
+			}
 		}
 	}
 }

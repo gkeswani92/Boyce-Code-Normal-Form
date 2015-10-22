@@ -113,4 +113,12 @@ public class AttributeSet {
 		}
 		return true;
 	}
+	
+	public boolean matches(ArrayList<AttributeSet> candKeys){
+		for(AttributeSet candKey: candKeys)
+			if(this.equals(candKey))
+				return false;
+			
+		return true;
+	}
 }

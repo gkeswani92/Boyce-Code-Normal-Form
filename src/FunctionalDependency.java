@@ -24,4 +24,8 @@ public class FunctionalDependency {
 	public AttributeSet dependent() {
 		return new AttributeSet(_dependentAttributeSet);
 	}
+	
+	public String toString(){
+		return this.independent()+"-->"+this.dependent();
+	}
 }
