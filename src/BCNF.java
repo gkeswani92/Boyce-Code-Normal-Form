@@ -2,7 +2,6 @@ import java.util.*;
 
 public class BCNF {
 
-	
 	/**
 	 * Implement your algorithm here
 	 **/
@@ -11,6 +10,13 @@ public class BCNF {
 		return decomposeAttributeSet(attributeSet, functionalDependencies, normalisedRelations);
 	}
 
+	/**
+	 * Recursive method that actually decomposes a relations into two relations if it violates BCNF
+	 * @param attributeSet
+	 * @param functionalDependencies
+	 * @param normalisedRelations
+	 * @return
+	 */
 	public static Set<AttributeSet> decomposeAttributeSet(AttributeSet attributeSet,
 						Set<FunctionalDependency> functionalDependencies, Set<AttributeSet> normalisedRelations){
 		
@@ -23,16 +29,15 @@ public class BCNF {
 		//Determine all the keys of the given relation and then determining the candidate keys
 		ArrayList<AttributeSet> keys = getAllKeys(attributeSet, functionalDependencies, attributeCombination);
 		
+		//Check if an FD violates BCNF. If it does, normalise the relation into two and recursively normalise on the new two
 		boolean needToDecompose = true;
-		
-		//TODO: Check for the nested loop structure with Tanvi
 		for(FunctionalDependency fd: functionalDependencies){	
 			needToDecompose = needToDecompose(fd, keys, attributeSet);
 			if(needToDecompose == true){
 				ArrayList<AttributeSet> normalised = normalizeRelations(fd, attributeSet);
 				normalisedRelations = decomposeAttributeSet(normalised.get(1), functionalDependencies, normalisedRelations);
 				normalisedRelations = decomposeAttributeSet(normalised.get(0), functionalDependencies, normalisedRelations);
-				break;
+				break; //We break because this originally normalised relation is no more. So we should not be looping over it
 			}
 		}
 			
@@ -60,9 +65,11 @@ public class BCNF {
 		if(!currentRelation.isSupersetOf(fd_attr))
 			return false;
 		
+		//If the current relations only contrains those attributes that are there in the FD, then it is in BCNF
 		if(currentRelation.equals(fd_attr))
 			return false;
 		
+		//If the FD matches even one of the candidate keys, we dont decompose
 		for(AttributeSet candKey: candKeys)
 			if(fd.independent().equals(candKey))
 				return false;
@@ -81,6 +88,7 @@ public class BCNF {
 	public static ArrayList<AttributeSet> getAttributeCombinations(ArrayList<Attribute> attributes, int startIndex,
 					ArrayList<AttributeSet> attributeCombination, AttributeSet combinationGenerator) {
 		
+		//Generate all possible combinations of attribute subsets
 		for (int i = startIndex; i < attributes.size(); i++) {
 			combinationGenerator.addAttribute(attributes.get(i));
 			attributeCombination.add(new AttributeSet(combinationGenerator));
@@ -101,12 +109,10 @@ public class BCNF {
 			Set<FunctionalDependency> functionalDependencies, ArrayList<AttributeSet> attributeCombination){
 		
 		ArrayList<AttributeSet> keys = new ArrayList<AttributeSet>();
-		AttributeSet test = new AttributeSet();
-		test.addAttribute(new Attribute("d"));
-		test.addAttribute(new Attribute("f"));
 		
-		for(AttributeSet as: attributeCombination){
-			
+		//Compute closure of each attribute set and check if its closure is U. 
+		//If it is, add it to the list of keys
+		for(AttributeSet as: attributeCombination){			
 			AttributeSet closureOfCurrentAttributeSet = closure(as, functionalDependencies);
 			if(closureOfCurrentAttributeSet.isSupersetOf(attributeSetRelation)){
 				keys.add(as);
@@ -124,10 +130,12 @@ public class BCNF {
 	 */
 	public static ArrayList<AttributeSet> normalizeRelations(FunctionalDependency fd, AttributeSet as){
 		
+		//The right relations is the contents of the FD
 		AttributeSet right = new AttributeSet();
 		right.appendAttributeSet(fd.independent());
 		right.appendAttributeSet(fd.dependent());
 		
+		//The left relations is the remaining contents and the independent side of the fd
 		AttributeSet left = new AttributeSet();
 		ArrayList<Attribute> dependentAttributes = fd.dependent().getAttributeList();
 		for(Attribute current: as.getAttributeList()){
@@ -168,11 +176,20 @@ public class BCNF {
 			}
 		}
 		
+		//The closure generated from the original attributes can lead to more fd's 
+		//becoming applicable to it. This method generates those and adds it to 
+		//the closure set
 		reCalculateNewClosure(closureOfAttributeSet, functionalDependencies);
 			
 		return closureOfAttributeSet;
 	}
 	
+	/**
+	 * Recursive method to compute the closure of a set of attributes
+	 * @param currentClosure
+	 * @param functionalDependencies
+	 * @return
+	 */
 	public static AttributeSet reCalculateNewClosure(AttributeSet currentClosure, Set<FunctionalDependency> functionalDependencies){
 		
 		ArrayList<AttributeSet> attributeCombination = new ArrayList<AttributeSet>();
