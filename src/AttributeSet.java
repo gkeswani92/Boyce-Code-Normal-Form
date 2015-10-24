@@ -113,4 +113,29 @@ public class AttributeSet {
 		}
 		return true;
 	}
+	
+	public AttributeSet dropAttributes(AttributeSet other, AttributeSet relationAttributes){
+		
+		//Removing elements that are on the independent side from the dependent side
+		Iterator<Attribute> iter = other.iterator();
+		while(iter.hasNext()){
+			Attribute attrToRemove = iter.next();
+			if(this.contains(attrToRemove)){
+				this._attributes.remove(attrToRemove);
+			}
+		}
+		
+		//Removing elements from the dependent side that are not in the relation set
+		ArrayList<Attribute> attrToBeRemoved = new ArrayList<Attribute>();
+		for(int index=0; index<this._attributes.size(); index++){
+			if(!relationAttributes.contains(this._attributes.get(index)))
+				attrToBeRemoved.add(this._attributes.get(index));
+		}
+		
+		for(Attribute attr: attrToBeRemoved){
+			this._attributes.remove(attr);
+		}
+		
+		return this;
+	}
 }

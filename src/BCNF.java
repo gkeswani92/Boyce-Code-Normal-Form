@@ -1,17 +1,35 @@
 import java.util.*;
 
+/*
+ * Authors: gk368 and nsp46
+ */
 public class BCNF {
 
 	/**
 	 * Implement your algorithm here
 	 **/
 	public static Set<AttributeSet> decompose(AttributeSet attributeSet, Set<FunctionalDependency> functionalDependencies) {
+		
+		//Converting the set of FD's to a tree set because the order was different 
+		//when the test case was run individually vs when it was run in a group
+		Set<FunctionalDependency> orderedFDs = new TreeSet<FunctionalDependency>(new Comparator<FunctionalDependency>() {
+	          @Override
+	          public int compare(FunctionalDependency o1, FunctionalDependency o2) {
+	              if(o1.independent().size() > o2.independent().size()) 
+	                  return 1;
+	              else 
+	                  return -1;
+	          }
+	      });
+		orderedFDs.addAll(functionalDependencies);
 		Set<AttributeSet> normalisedRelations = new HashSet<AttributeSet>();
-		return decomposeAttributeSet(attributeSet, functionalDependencies, normalisedRelations);
+		return decomposeAttributeSet(attributeSet, orderedFDs, normalisedRelations);
 	}
 
 	/**
-	 * Recursive method that actually decomposes a relations into two relations if it violates BCNF
+	 * Recursive method that actually decomposes a relations into two relations
+	 * if it violates BCNF
+	 * 
 	 * @param attributeSet
 	 * @param functionalDependencies
 	 * @param normalisedRelations
@@ -20,16 +38,17 @@ public class BCNF {
 	public static Set<AttributeSet> decomposeAttributeSet(AttributeSet attributeSet,
 						Set<FunctionalDependency> functionalDependencies, Set<AttributeSet> normalisedRelations){
 		
-		//Creating a list of attributes and finding all combinations of these attributes to determine the candidate keys
+		//Creating a list of attributes and finding all combinations of these 
 		ArrayList<Attribute> attributes = attributeSet.getAttributeList();
 		ArrayList<AttributeSet> attributeCombination = new ArrayList<AttributeSet>();
 		AttributeSet combinationGenerator = new AttributeSet();
 		attributeCombination = getAttributeCombinations(attributes, 0, attributeCombination, combinationGenerator);
 		
-		//Determine all the keys of the given relation and then determining the candidate keys
+		//Determine all the keys of the given relation
 		ArrayList<AttributeSet> keys = getAllKeys(attributeSet, functionalDependencies, attributeCombination);
 		
-		//Check if an FD violates BCNF. If it does, normalise the relation into two and recursively normalise on the new two
+		//Check if an relation violates BCNF. If it does, normalise the relation 
+		//into two and recursively check the two ner relations
 		boolean needToDecompose = true;
 		for(FunctionalDependency fd: functionalDependencies){	
 			needToDecompose = needToDecompose(fd, keys, attributeSet);
@@ -37,7 +56,10 @@ public class BCNF {
 				ArrayList<AttributeSet> normalised = normalizeRelations(fd, attributeSet);
 				normalisedRelations = decomposeAttributeSet(normalised.get(1), functionalDependencies, normalisedRelations);
 				normalisedRelations = decomposeAttributeSet(normalised.get(0), functionalDependencies, normalisedRelations);
-				break; //We break because this originally normalised relation is no more. So we should not be looping over it
+				
+				//We break because this originally normalised relation is no more. 
+				//So we should not be looping over it
+				break; 
 			}
 		}
 			
@@ -57,16 +79,16 @@ public class BCNF {
 	 */
 	public static boolean needToDecompose(FunctionalDependency fd, ArrayList<AttributeSet> candKeys, AttributeSet currentRelation ){
 		
-		//Check if the FD contains valid attributes i.e. attributes that are present in the current relation
 		AttributeSet fd_attr = new AttributeSet(fd.independent());
 		fd_attr.appendAttributeSet(fd.dependent());
-		
-		//If the relation contains attributes the fd does not contain, then false
-		if(!currentRelation.isSupersetOf(fd_attr))
+
+		if(fd.dependent().equals(fd.independent())) //Trivial FD. Ignore it
 			return false;
 		
-		//If the current relations only contrains those attributes that are there in the FD, then it is in BCNF
-		if(currentRelation.equals(fd_attr))
+		if(!currentRelation.isSupersetOf(fd_attr)) //If the relation contains attributes the fd does not contain, then false
+			return false;
+		
+		if(currentRelation.equals(fd_attr)) //If the current relations only contrains those attributes that are there in the FD, then it is in BCNF
 			return false;
 		
 		//If the FD matches even one of the candidate keys, we dont decompose
@@ -74,6 +96,7 @@ public class BCNF {
 			if(fd.independent().equals(candKey))
 				return false;
 		
+		//The relation violates BCNF. So we need to normalise it.
 		return true;
 	}
 	
@@ -110,6 +133,7 @@ public class BCNF {
 		
 		ArrayList<AttributeSet> keys = new ArrayList<AttributeSet>();
 		
+		
 		//Compute closure of each attribute set and check if its closure is U. 
 		//If it is, add it to the list of keys
 		for(AttributeSet as: attributeCombination){			
@@ -117,6 +141,17 @@ public class BCNF {
 			if(closureOfCurrentAttributeSet.isSupersetOf(attributeSetRelation)){
 				keys.add(as);
 			}
+			
+			//If some new FD's were found while calculating the closure, add them to 
+			//the list of FD's
+			AttributeSet ind = new AttributeSet(as);
+			AttributeSet dep = new AttributeSet(closureOfCurrentAttributeSet);
+			dep.dropAttributes(ind, attributeSetRelation);
+			if(dep.size() != 0 && !ind.equals(dep)){
+				FunctionalDependency fd = new FunctionalDependency(ind, dep);
+				if(!functionalDependencies.contains(fd))
+					functionalDependencies.add(fd);
+			}	
 		}
 		return keys;
 	}
@@ -165,16 +200,11 @@ public class BCNF {
 		ArrayList<AttributeSet> currentAttrCombination = getAttributeCombinations(attributeSet.getAttributeList(), 0, attributeCombination, combinationGenerator);
 		
 		//Determining the closure from the attribute set passed to the method
-		for(AttributeSet currentAS: currentAttrCombination){
-			for(FunctionalDependency fd: functionalDependencies){
-				
-				if(fd.independent().equals(currentAS)){
-					if(!closureOfAttributeSet.isSupersetOf(fd.dependent())){
+		for(AttributeSet currentAS: currentAttrCombination)
+			for(FunctionalDependency fd: functionalDependencies)
+				if(fd.independent().equals(currentAS))
+					if(!closureOfAttributeSet.isSupersetOf(fd.dependent()))
 						closureOfAttributeSet.appendAttributeSet(fd.dependent());
-					}
-				}
-			}
-		}
 		
 		//The closure generated from the original attributes can lead to more fd's 
 		//becoming applicable to it. This method generates those and adds it to 
